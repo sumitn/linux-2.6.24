@@ -1,0 +1,45 @@
+				ATTACH TODO
+
+* CHECK FOR ANY CONCEIVABLE ERROR
+
+fist_ioctl +a /mnt/sfuse abc /n/fist/sfuse/zadok
+	oops if /n/fist/sfuse/zadok doesn't exist
+	CPW: Fixed, hidden_dentry not correctly validated.
+
+ensure that only file owners are allowed to attach to their own directories
+	what about the privs of mount point?
+	CPW: Should it be owners or people with READ/EXEC perms?
+	Check that MAY_EXEC and MAY_READ are permitted on to.
+
+
+ensure that you can only attach to directories.
+	CPW: S_ISDIR added.
+
+* works
+
+- stat /mnt/sfuse/nonexistent IS OK
+
+- stat /mnt/sfuse/abd/nonexistent IS OK
+
+* bugs
+
+stat /mnt/sfuse/abd/date.txt (exists)
+	oops1 in sfuse_interpose.
+	fixed: had to do w/ using static inode numbers.
+
+Problem: attach node and hidden one may have different names!
+	is that a problem in our expected code?
+check if
+	fist_ioctl +a /mnt/sfuse zadok /n/fist/sfuse/zadok
+	makes a different wrt oops1
+	Nope: we still get an oops
+
+- busy inodes after umount (kernel message)
+	probably b/c we haven't implemented detach yet
+
+- at some point I got an oops from "ls /mnt/sfuse/abc"
+	can't reproduce it.
+	I think it was in file ops (release)
+
+- CPW: The attached name changed from "compile2" to "compile2ZZZZ"
+  Then it disappeared while I was doing 2 concurrent gcc compiles.

@@ -1,0 +1,61 @@
+	 THIS FILE MUST BE DISTRIBUTED WITH ALL VERSIONS OF FISTGEN
+			      OR THE TEMPLATES
+  THE COPYRIGHT NOTICE IN EACH SOURCE FILE IN FISTGEN MUST BE KEPT INTACT
+
+This file is released with fistgen-0.1.1.
+
+Copyright (c) 1997-2004 Erez Zadok <ezk@cs.stonybrook.edu>
+Copyright (c) 2001-2004 Stony Brook University
+
+
+First and foremost, I reserve the right to relicense any part of the fistgen
+package under a different license as I see fit.  The licensing changed over
+the lifetime of the FiST project.  See the specific license descriptions
+below.
+
+Second, if you use any part of the fistgen code (including the templates and
+the generated code), you must include the existing copyright notice which
+you can find at the top if each source file, as a C style comment.
+
+As a matter of courtesy, I ask that anyone who uses FiST---commercially or
+otherwise---send me a quick note of what they are using it for.  I promise
+to keep such information confidential if you ask for discretion.  Knowing
+what people do with FiST helps me to justify allocation of grant money,
+student effort, and my time for this project.
+
+* fistgen versions newer than 0.1.1
+
+- I added a new .fist file declaration called "license" which takes a
+  string.  You must define *some* non-empty license string in your .fist
+  file, using this "license" declaration.  It's up to the author to decide
+  what they want: it can be anything (open-source, proprietary, etc.).  But
+  if on Linux you pick something other than the approved licenses as listed
+  in <linux/module.h>, your module may not link into the kernel if it's
+  using GPL-only symbols.  This change was made to ensure that users of
+  fistgen are fully aware what license they picked for their module on
+  Linux.
+
+* fistgen versions 0.0.5 an newer
+
+- I added a special exception similar to the Bison licensing exception made
+  by the FSF.  Code GENERATED from the GPL'ed Linux templates may be used
+  without restriction.  Note that the templates themselves are still GPL'ed
+  and changes to them must be released. See
+  http://www.gnu.org/manual/bison-1.35/html_node/Conditions.html#Conditions
+
+* fistgen version 0.0.4.1 and earlier
+
+- The sources for the fistgen tool (not including the templates in the
+  fistgen/templates/ subdirectory) are under GPL.
+
+- All Linux templates are under GPL.  All code generated from these
+  templates is GPL too.
+
+- All FreeBSD templates are under the BSD license.  All code generated from
+  these templates also uses the BSD license.
+
+- All Solaris templates and generated code follow the BSD license.
+
+The home page for the FiST project is http://www.filesystems.org/
+
+Erez Zadok <ezk@cs.sunysb.edu>

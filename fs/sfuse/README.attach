@@ -1,0 +1,85 @@
+
+		GENERAL INFORMATION ON NEW FIST ATTACH MODE
+
+WARNING: this code is alpha quality at best!  Only the bare-bone features
+are implemented: much is missing and no serious error checking is done.  It
+is currently supported only on Linux 2.4 and tested only with Wrapfs.
+
+* Problem
+
+When you mount a stackable file system, you stack it on top of another
+directory.  That mount can only be done by the root user, because the VFS
+checks that before it calls your file system code.
+
+There are cases where you'd like to stack a file system on top of multiple
+directories.  For example, suppose you wanted to use Cryptfs to encrypt
+several users' directories.  If you wanted to encrypt the entire set of home
+directories, you could stack Cryptfs on top of /home.  But what if you do
+not want to encrypt all of /home, but only portions of it, say
+/home/ezk/priv and /home/ion/Mail/personal?  You would have to mount Cryptfs
+twice, one for each of those directories.  Now imagine hundreds of users
+wanting each to have a personal crypto directory, and you can see why
+hundreds of mounts are impractical (and also impossible, as most kernels
+have hard limits on the maximum allowed number of mounts).
+
+Another, even more serious problem with Cryptfs is when trying to support
+multiple user keys.  Current Cryptfs supports only one keys.  If you change
+the code to support multiple keys (per UID, per GID, per UID+SID) as many
+have done, you find serious name clashes.  For example two users with
+group-access to the same directory can create the same file "foo", which
+encrypts to different ciphertext names; so it's allowed on the lower-level
+file system, but cannot be allowed inside Cryptfs.  Such and other odd
+semantics are due to the fact that current Cryptfs has a shared name space.
+The new attach mode will allow Cryptfs to  separate the name spaces, thus
+improving security and avoiding name clashes and odd semantics.
+
+* Solution
+
+Our solution is called "attach-mode mount."  You enable it in your .fist
+file with the declaration "mntstyle attach."  In this mode, you mount a very
+thin stackable file system on top of a given mount point, and you do NOT
+specify at mount-time which directory you're going to stack on.  Instead,
+that specification comes later.
+
+Once you mount a stackable file system in attach-mode, you get an empty
+directory.  Now you can run fist_ioctl to execute the new "attach" ioctl
+which will allow you to attach a new directory node right below the
+stackable file system mount point, and have that new node point to your
+personal directory.
+
+(BTW, this attach-style mount is not new.  Matt Blaze did something similar
+for CFS, only in a user-level file server.)
+
+* Examples
+
+root# mount -t sfuse -o debug=18 none /mnt/sfuse
+ezk$ fist_ioctl +a /mnt/sfuse zadok /home/ezk/priv
+ion$ fist_ioctl +a /mnt/sfuse badula /home/ion/Mail/personal
+	and so on...
+
+The above sequence of commands will result in having two new directory
+entries inside /mnt/sfuse:
+
+$ ls -a /mnt/sfuse
+. .. badula zadok
+
+The actions of attach and detach are very similar to mount and unmount,
+respectively -- only that the attach/detach ioctls do not require root
+privileges.
+
+You can use "fist_ioctl -a" to detach a node (may not be implemented yet).
+
+* Implementation
+
+The exact details of this code are in the Linux-2.4 FiST template.  Look for
+sections of code delimited by #ifdef FIST_MNTSTYLE_ATTACH.  Briefly, when
+you mount Wrapfs in attach mode, it uses a different set of VFS ops (iops,
+dops, fops, etc.) than the normal stacking code.  There is no "hidden"
+superblock, dentry, or inode at mount time.  The only real operation
+possible at this point is the attach ioctl.  This one will create a new
+virtual dentry as a child of the mount point, and set its hidden dentry to
+the one that the user pointed to.  From that point on, we're using the
+regular stacking code and VFS operations.
+
+Happy attaching,
+Erez.

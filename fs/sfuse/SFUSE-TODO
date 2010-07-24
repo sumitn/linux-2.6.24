@@ -1,0 +1,78 @@
+# -*- text -*-
+
+#vfs_statfs: done
+
+#vfs_create: done
+#vfs_mknod: done
+#vfs_mkdir: done
+
+vfs_rmdir: broken, needs to be done from d_iput
+vfs_unlink: ditto
+#vfs_rename: done
+#vfs_link: done
+#vfs_symlink: done
+#vfs_readlink: done
+	see if we can use page_readlink and page_follow_link, which should
+	improve performance. -should be doable, but not for SCA
+#vfs_readdir: done
+generic_file_mmap: should be possible, would allow us to get rid of
+	everything in vm_area.c
+
+#look at permission()
+
+#check that setattr (truncate file, chmod) works -done
+
+#write_inode: does chmod propagate to the lower f/s? -done
+
+#check Mark Schaefer's 3 bugs. -done
+
+#in commit_write, if we get an error, do setpageerror or clearpageuptodate or
+#something. -done
+
+##############################################################################
+## OLD STUFF BELOW
+##############################################################################
+#replace our read w/ generic_file_read and see if that works instead. it
+#would call our readpage which is implemented. -done
+
+#break write into pages.  or better yet. use generic_writepage as our write
+#fxn, and then implement updatepage, which will call the lower fxn's write
+#fxn with the right args. -done
+
+#then cryptfs and file names. -done
+
+#fix leak in lower-fs refcounts. -done
+#put copy_inode_modes everywhere!!! (esp. read/write) -done
+#try truncate -done
+fix d_compare
+#check append -done
+
+follow all XXX comments and EZK comments
+
+* dentry questions
+
+when does a new dentry ever get created/malloc'ed for the first time?
+	answer: in lookup *only*
+
+maybe we should "interpose" on a dentry only if its d_inode!=NULL (i.e., it
+	is not a negative entry?) - no, it needs to be done regardless
+
+whenever I do
+	inode_t *old_inode = old_dentry->d_inode;
+or the like, then assrt that old_inode is not null (see foofs_link)
+
+* misc:
+
+does struct qstr have full pathname or just one component.
+	answer: one component only
+
+unify main.c and super.c, and avoid fist_mod_dec_use_count()
+
+tell linux-kernel to expose fs/namei.c: double_lock/unlock
+     ditto for lock_parent
+     and linux/fs/read_write.c: default_llseek()
+
+linux/fs.h: namei macro should not use 1, but LOOKUP_FOLLOW
+
+tell kernel hackers of pread/pwrite interface deficiencies.
+##############################################################################

@@ -68,6 +68,9 @@ config FS_XIP
 	depends on EXT2_FS_XIP
 	default y
 
+config SFUSE_FS
+       tristate "Stackable FUSE"
+
 config EXT3_FS
 	tristate "Ext3 journalling file system support"
 	select JBD
